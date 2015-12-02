@@ -1,0 +1,93 @@
+#include<iostream>
+#include<cstdlib>
+
+template<class Type>
+
+class Node{
+  friend class Chain;
+private:
+  Type data;
+  Node* next;
+};
+template <class Type>
+
+class Chain{
+public:
+  Node<Type> *first;
+  Node<Type> *last;
+public:
+  Chain();
+  void addNode(Type );
+  void addChain(Chain& );
+  void Display();
+};
+template <class Type>
+Chain<Type>::Chain()
+{
+  first=last=NULL;
+}
+template <class Type>
+void Chain<Type>::addNode(Type value)
+{
+  if(first!=NULL)
+  {
+    Node<Type>* a;
+    a=(Node<Type>*)malloc(sizeof(Node<Type>));
+    a->data=value;
+    last->next=a;
+    a->next=NULL;
+    last=a;
+  }
+  else
+  {
+    Node<Type>* a;
+    a=(Node<Type>*)malloc(sizeof(Node<Type>));
+    a->data=value;
+    first=a;
+    last=a;
+    a->next=NULL;
+  }
+}
+
+void Chain::addChain(Chain& a)
+{
+  if(first!=NULL)
+  {
+    if(a.first!=NULL)
+    {
+      last->next=a.first;
+      last=a.last;
+    }
+  }
+  else
+  {
+    first=a.first;
+    last=a.last;
+  }
+}
+
+void Chain::Display()
+{
+  Node<Type>* a;
+  for(a=first;a!=NULL;a=a->next)
+  {
+    cout<<a->data<<" ";
+  }
+  cout<<"\n";
+}
+template <class Type>
+int main()
+{
+  int i,n;
+  Type value;
+  Chain <int> a;
+  cout<<"Insert the no. of elements\n";
+  cin>>n;
+  for(i=0;i<n;i++)
+  {
+    cin>>value;
+    a.addNode(value);
+  }
+  a.Display;
+  return 0;
+}

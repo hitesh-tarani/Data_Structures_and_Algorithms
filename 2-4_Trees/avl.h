@@ -1,0 +1,227 @@
+#ifndef _AVLTREE_INCLUDED_H
+#define _AVLTREE_INCLUDED_H
+#include"bst.h"
+
+template<class Type>
+class avlTree:public bst<Type>{
+ public:
+  avlTree();
+  int balFactor(bstNode<Type>* );
+  void balance();
+  void balance(bstNode<Type>* );
+  void LeftRotation(bstNode<Type>* );
+  void RightRotation(bstNode<Type>* );
+  void inorderDisplay();
+  void inorderDisplay(bstNode<Type>* );
+  void preorderDisplay();
+  void preorderDisplay(bstNode<Type>* );
+};
+
+template<class Type>
+void avlTree<Type>::inorderDisplay()
+{
+  inorderDisplay(this->root);
+}
+
+template<class Type>
+void avlTree<Type>::inorderDisplay(bstNode<Type>* x)
+{
+  if(x==NULL)
+    return ;
+  inorderDisplay(x->left);
+  std::cout<<"Key : "<<x->data.getId();
+  std::cout<<" Height : "<<x->height<<" Balance Factor: "<<balFactor(x)<<std::endl;
+  std::cout<<x->data.getId();
+  inorderDisplay(x->right);
+}
+
+template<class Type>
+void avlTree<Type>::preorderDisplay()
+{
+  preorderDisplay(this->root);
+}
+
+template<class Type>
+void avlTree<Type>::preorderDisplay(bstNode<Type>* x)
+{
+  if(x==NULL)
+    return ;
+  /*  if(x->parent!=NULL)
+    std::cout<<"Parent "<<x->parent->data.getId();
+  else
+    std::cout<<"0 ";
+  if(x->left!=NULL)
+    std::cout<<"left "<<x->left->data.getId();
+  else
+    std::cout<<"0 ";
+  if(x->right!=NULL)
+    std::cout<<"right "<<x->right->data.getId();
+  else
+    std::cout<<"0 ";
+  */
+  std::cout<<"Key : "<<x->data.getId();
+  std::cout<<" Height : "<<x->height<<" Balance Factor: "<<balFactor(x)<<std::endl;
+  preorderDisplay(x->left);
+  preorderDisplay(x->right);
+}
+
+template<class Type>
+avlTree<Type>::avlTree()
+{
+  this->root=NULL;
+  this->n=0;
+}
+
+template<class Type>
+int avlTree<Type>::balFactor(bstNode<Type>* x)
+{
+  int hl,hr;
+  hl=hr=-1;
+  if(x->left!=NULL)
+    hl=(x->left)->height;
+  if(x->right!=NULL)  
+    hr=(x->right)->height;
+  return (hl-hr);
+}
+
+template<class Type>
+void avlTree<Type>::balance()
+{
+  while(this->toBalanceptr!=NULL)
+  {
+    int bal_factor=balFactor(this->toBalanceptr);
+    if(bal_factor==2||bal_factor==-2)
+      break;
+    this->toBalanceptr=(this->toBalanceptr)->parent;
+  }
+  if(this->toBalanceptr!=NULL)
+    balance(this->toBalanceptr);
+}
+
+template<class Type>
+void avlTree<Type>::balance(bstNode<Type>* x)
+{
+  bstNode<Type>* y;
+  if(balFactor(x)==2)
+  {
+    y=x->left;
+    if(balFactor(y)==1)
+    {
+      RightRotation(x);
+    }
+    else
+    {
+      LeftRotation(y);
+      RightRotation(x);
+    }
+  }
+  else if(balFactor(x)==-2)
+  {
+    y=x->right;
+    if(balFactor(y)==-1)
+      {
+      LeftRotation(x);
+    }
+    else
+    {
+      RightRotation(y);
+      LeftRotation(x);
+    }
+  }
+}
+
+template<class Type>
+void avlTree<Type>::LeftRotation(bstNode<Type>* x)
+{
+  bstNode<Type>* y;
+  y=x->right;
+  if(x->parent==NULL)
+  {
+    this->root=y;
+  }
+  else
+  {
+    if(x==(x->parent)->left)
+      (x->parent)->left=y;
+    else
+      (x->parent)->right=y;
+  }
+  y->parent=x->parent;
+  x->parent=y;
+  x->right=y->left;
+  if(y->left!=NULL)
+    (y->left)->parent=x;
+  y->left=x;
+  int hl,hr,max;
+  hl=hr=max=-1;
+  if(x->left!=NULL)
+    hl=(x->left)->height;
+  if(x->right!=NULL)  
+    hr=(x->right)->height;
+  if(hl>=hr)
+    max=hl;
+  else
+    max=hr;
+  x->height=max+1;
+  hl=hr=max=-1;
+  if(y->left!=NULL)
+    hl=(y->left)->height;
+  if(y->right!=NULL)  
+    hr=(y->right)->height;
+  if(hl>=hr)
+    max=hl;
+  else
+    max=hr;
+  y->height=max+1;
+  if(y->parent!=NULL)
+    updateHeight(y->parent);
+}
+
+template<class Type>
+void avlTree<Type>::RightRotation(bstNode<Type>* x)
+{
+  bstNode<Type>* y;
+  y=x->left;
+  if(x->parent==NULL)
+  {
+    this->root=y;
+  }
+  else
+  {
+    if(x==(x->parent)->left)
+      (x->parent)->left=y;
+    else
+      (x->parent)->right=y;
+  }
+  y->parent=x->parent;
+  x->parent=y;
+  x->left=y->right;
+  if(y->right!=NULL)
+    (y->right)->parent=x;
+  y->right=x;
+  int hl,hr,max;
+  hl=hr=max=-1;
+  if(x->left!=NULL)
+    hl=(x->left)->height;
+  if(x->right!=NULL)  
+    hr=(x->right)->height;
+  if(hl>=hr)
+    max=hl;
+  else
+    max=hr;
+  x->height=max+1;
+  hl=hr=max=-1;
+  if(y->left!=NULL)
+    hl=(y->left)->height;
+  if(y->right!=NULL)  
+    hr=(y->right)->height;
+  if(hl>=hr)
+    max=hl;
+  else
+    max=hr;
+    y->height=max+1;
+  if(y->parent!=NULL)
+    updateHeight(y->parent);
+}
+
+#endif

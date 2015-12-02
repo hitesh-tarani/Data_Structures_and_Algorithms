@@ -1,0 +1,78 @@
+#include<iostream>
+#include<ctime>
+#include <fstream>
+using namespace std;
+#define max 1000001
+
+int partition(int *a,int p,int r)
+{
+ int i,j,temp,pivot;
+ pivot=a[r];
+ i=p-1;
+ j=r+1;
+ while(1)
+ {
+  do
+  {
+   j--;
+  }while(a[j]>pivot);
+  do
+  {
+   i++;
+  }while(a[i]<pivot);
+  
+  if(i<j)
+  {
+   temp=a[i];
+   a[i]=a[j];
+   a[j]=temp;
+  }
+  else
+   return (i-1);
+ }
+}
+
+void Partsort(int* a,int p,int r)
+{
+ int i,q;
+ if(p<r)
+ {
+  q=partition(a,p,r);
+  Partsort(a,p,q);
+  Partsort(a,q+1,r);
+ }
+}
+
+int main(int argc, char* argv[])
+{
+ if(argc==2)
+ {
+  ifstream inFile;
+  inFile.open(argv[1]);
+  string temp;
+  int i=0,n=-1;
+  while(!inFile.eof())
+  {
+   getline(inFile,temp);
+   n++;
+  }
+  inFile.close();
+  inFile.open(argv[1]);
+  int array[n];
+  for(i=0;i<n;i++)
+  {
+   inFile >> array[i];
+  }
+  //cout << "Enter the number of elements\n";
+  //cin >> n;
+  //cout << "Enter the numbers\n";
+  //for(i=0;i<n;i++)
+   //cin >> array[i];
+  clock_t tStart = clock();
+  Partsort(array,0,n-1);
+  clock_t tStop = clock();
+  cout<<"Time taken:"<< (double)(tStop-tStart)/ CLOCKS_PER_SEC << endl;
+ }
+ return 0;
+}
+

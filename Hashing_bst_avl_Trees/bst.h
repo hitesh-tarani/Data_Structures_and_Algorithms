@@ -1,0 +1,594 @@
+#ifndef _BST_INCLUDED_H
+#define _BST_INCLUDED_H
+
+#include<iostream>
+template<class Type>
+class bst;
+
+template<class Type>
+class avlTree;
+
+template<class Type>
+class bstNode{
+  friend class bst<Type>;
+  friend class avlTree<Type>;
+ private:
+  bstNode<Type> *parent;
+  Type data;
+  int height;
+  bstNode<Type> *left;
+  bstNode<Type> *right;
+ public:
+  bstNode();
+};
+
+template<class Type>
+bstNode<Type>::bstNode()
+{
+  left=right=NULL;
+  height=0;
+}
+
+template<class Type>
+class bst{
+ protected:
+  bstNode<Type> *root;
+  int n;
+  void inorderDisplay(bstNode<Type>* );
+  void preorderDisplay(bstNode<Type>* );
+  void PrintToFile(bstNode<Type>* , ofstream& );
+  void levelorderDisplay(bstNode<Type>* ,int ,int );
+  bstNode<Type>* toBalanceptr;
+ public:
+  bst();
+  //~bst();
+  bool isEmpty();
+  bstNode<Type>* getRoot();
+  int resetHeight();
+  int resetHeight(bstNode<Type>*);
+  int updateHeight(bstNode<Type>* );
+  int length();
+  void insert(Type );
+  void insert(Type , int (*function)(char[] , Type ));
+  bool search(Type );
+  bool search(char[] , int (*function)(char[] ,Type ));
+  bstNode<Type>* successor(bstNode<Type>* );
+  bool deleteElement(Type );
+  bool deleteElement(char[] , int(*function)(char[] ,Type ));
+  void inorderDisplay();
+  void preorderDisplay();
+  void levelorderDisplay();
+  void PrintToFile(ofstream& );
+};
+
+template<class Type>
+bst<Type>::bst()
+{
+  root=NULL;
+  n=0;
+  toBalanceptr=NULL;
+}
+
+template<class Type>
+bool bst<Type>::isEmpty()
+{
+  return(n==0);
+}
+
+template<class Type>
+int bst<Type>::length()
+{
+  return n;
+}
+
+template<class Type>
+void bst<Type>::insert(Type data)
+{
+  bstNode<Type> *a=new bstNode<Type>;
+  bstNode<Type> *x=root;
+  bstNode<Type> *y=root;
+  if(root==NULL)
+  {
+    root=a;
+    a->parent=NULL;
+    toBalanceptr=NULL;
+  }
+  else
+  {
+    while(x!=NULL)
+    {
+      y=x;
+      if(data<x->data)
+      {
+	x=x->left;
+      }
+      else
+      {
+	x=x->right;
+      }
+    }
+    if(data<y->data)
+    {
+      a->parent=y;
+      y->left=a;
+    }
+    else
+    {
+      a->parent=y;
+      y->right=a;
+    }
+    updateHeight(a->parent);
+    toBalanceptr=a->parent;
+  }
+  a->data=data;
+  n++;
+}
+
+template<class Type>
+void bst<Type>::insert(Type data, int (*function)(char a[],Type b))
+{
+  bstNode<Type> *a=new bstNode<Type>;
+  bstNode<Type> *x=root;
+  bstNode<Type> *y=root;
+  if(root==NULL)
+  {
+    root=a;
+    a->parent=NULL;
+    toBalanceptr=NULL;
+  }
+  else
+  {
+    while(x!=NULL)
+    {
+      y=x;
+      if(function(data.getId(),x->data)==-1)
+      {
+	x=x->left;
+      }
+      else
+      {
+	x=x->right;
+      }
+    }
+    if(function(data.getId(),y->data)==-1)
+    {
+      a->parent=y;
+      y->left=a;
+    }
+    else
+    {
+      a->parent=y;
+      y->right=a;
+    }
+    updateHeight(a->parent);
+    toBalanceptr=a->parent;
+  }
+  a->data=data;
+  n++;
+}
+
+template<class Type>
+bool bst<Type>::search(Type data)
+{
+  bstNode<Type> *x=root;
+  while(x!=NULL && data!=x->data)
+  {
+    if(data<x->data)
+    {
+      x=x->left;
+    }
+    else
+    {
+      x=x->right;
+    }
+  }
+  if(x==NULL)
+    return false;
+  else
+  {
+    std::cout<<x->data<<std::endl;
+    return true;
+  }
+}
+
+template<class Type>
+bool bst<Type>::search(char key[], int (*function)(char b[] , Type a))
+{
+  bstNode<Type> *x=root;
+  while(x!=NULL && function(key,x->data)!=0)
+  {
+    if(function(key,x->data)==-1)
+    {
+      x=x->left;
+    }
+    else
+    {
+      x=x->right;
+    }
+  }
+  if(x==NULL)
+    return false;
+  else
+  {
+    x->data.Display();
+    return true;
+  }
+}
+
+template<class Type>
+bstNode<Type>* bst<Type>::successor(bstNode<Type> *a)
+{
+  bstNode<Type> *x=a;
+  if(x->right!=NULL)
+  {
+    x=x->right;
+    while(x->left!=NULL)
+    {
+      x=x->left;
+    }
+  }
+  return x;
+}
+
+template<class Type>
+bool bst<Type>::deleteElement(Type data)
+{
+  bstNode<Type> *x=root;
+  while(x!=NULL && data!=x->data)
+  {
+    if(data<x->data)
+    {
+      x=x->left;
+    }
+    else
+    {
+      x=x->right;
+    }
+  }
+  if(x==NULL)
+    return false;
+  else
+  {
+    if(x->left==NULL||x->right==NULL)
+    {
+      if(x->left!=NULL)
+      {
+	if(x->parent==NULL)
+	{
+	  root=x->left;
+	  (x->left)->parent=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=x->left;
+	  (x->left)->parent=x->parent;
+	}
+	else
+	{
+	  (x->parent)->right=x->left;
+	  (x->left)->parent=x->parent;
+	}
+      }
+      else if(x->right!=NULL)
+      {
+	if(x->parent==NULL)
+	{
+	  root=x->right;
+	  (x->right)->parent=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=x->right;
+	  (x->right)->parent=x->parent;
+	}
+	else
+	{
+	  (x->parent)->right=x->right;
+	  (x->right)->parent=x->parent;
+	}
+      }
+      else
+      {
+	if(x->parent==NULL)
+	{
+	  root=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=NULL;
+	}
+	else
+	{
+	  (x->parent)->right=NULL;
+	}
+      }
+      if(x->parent!=NULL)
+      {
+	updateHeight(x->parent);
+	toBalanceptr=x->parent;
+      }
+      else
+	toBalanceptr=NULL;
+      delete x;
+    }
+    else
+    {
+      bstNode<Type> *a;
+      a=successor(x);
+      if(a==(a->parent)->left)
+	(a->parent)->left=a->right;
+      else
+	(a->parent)->right=a->right;
+      if(a->right!=NULL)
+	(a->right)->parent=a->parent;
+      /*a->left=x->left;
+      a->right=x->right;
+      (x->left)->parent=a;
+      (x->right)->parent=a;
+      a->parent=x->parent;
+      if(x->parent==NULL)
+	root=a;
+      else
+      {
+	if(x==(x->parent)->left)
+        {
+	  (x->parent)->left=a;
+	}
+	else
+        {
+	  (x->parent)->right=a;
+	}
+      }
+      delete x;*/
+      x->data=a->data;
+      updateHeight(a->parent);
+      toBalanceptr=a->parent;
+      delete a;
+    }
+    //std::cout<<root->data;
+    n--;
+    return true;
+  }
+}
+
+template<class Type>
+bool bst<Type>::deleteElement(char data[], int(*function)(char b[],Type c))
+{
+  bstNode<Type> *x=root;
+  while(x!=NULL && function(data,x->data)!=0)
+  {
+    if(function(data,x->data)==-1)
+    {
+      x=x->left;
+    }
+    else
+    {
+      x=x->right;
+    }
+  }
+  if(x==NULL)
+    return false;
+  else
+  {
+    if(x->left==NULL||x->right==NULL)
+    {
+      if(x->left!=NULL)
+      {
+	if(x->parent==NULL)
+	{
+	  root=x->left;
+	  (x->left)->parent=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=x->left;
+	  (x->left)->parent=x->parent;
+	}
+	else
+	{
+	  (x->parent)->right=x->left;
+	  (x->left)->parent=x->parent;
+	}
+      }
+      else if(x->right!=NULL)
+      {
+	if(x->parent==NULL)
+	{
+	  root=x->right;
+	  (x->right)->parent=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=x->right;
+	  (x->right)->parent=x->parent;
+	}
+	else
+	{
+	  (x->parent)->right=x->right;
+	  (x->right)->parent=x->parent;
+	}
+      }
+      else
+      {
+	if(x->parent==NULL)
+	{
+	  root=NULL;
+	}
+	else if(x==(x->parent)->left)
+	{
+	  (x->parent)->left=NULL;
+	}
+	else
+	{
+	  (x->parent)->right=NULL;
+	}
+      }
+      if(x->parent!=NULL)
+      {
+	updateHeight(x->parent);
+	toBalanceptr=x->parent;
+      }
+      else
+	toBalanceptr=NULL;
+      delete x;
+    }
+    else
+    {
+      bstNode<Type> *a;
+      a=successor(x);
+      if(a==(a->parent)->left)
+	(a->parent)->left=a->right;
+      else
+	(a->parent)->right=a->right;
+      if(a->right!=NULL)
+	(a->right)->parent=a->parent;
+      x->data=a->data;
+      updateHeight(a->parent);
+      toBalanceptr=a->parent;
+      delete a;
+    }
+    n--;
+    return true;
+  }
+}
+
+template<class Type>
+int bst<Type>::updateHeight(bstNode<Type>* x)
+{
+  int hl,hr,max;
+  hl=hr=max=-1;
+  if(x->left!=NULL)
+    hl=(x->left)->height;
+  if(x->right!=NULL)  
+    hr=(x->right)->height;
+  if(hl>=hr)
+    max=hl;
+  else
+    max=hr;
+  if(x->height!=max+1)
+  {
+    x->height=max+1;
+    if(x->parent!=NULL)
+      updateHeight(x->parent);
+  }
+}
+
+template<class Type>
+int bst<Type>::resetHeight()
+{
+  resetHeight(root);
+}
+
+template<class Type>
+int bst<Type>::resetHeight(bstNode<Type>* x)
+{
+  int hl,hr;
+  if(x==NULL)
+    return -1;
+  else
+  {
+   hl=resetHeight(x->left);
+   hr=resetHeight(x->right);
+   if(hl>=hr)
+   {
+     x->height=hl+1;
+     return x->height;
+   }
+   else
+   {
+     x->height=hr+1;
+     return x->height;
+   }
+  }
+}
+
+template<class Type>
+void bst<Type>::inorderDisplay()
+{
+  inorderDisplay(root);
+}
+
+template<class Type>
+void bst<Type>::inorderDisplay(bstNode<Type>* x)
+{
+  if(x==NULL)
+    return ;
+  inorderDisplay(x->left);
+  cout<<"Key : "<<x->data.getId();
+  std::cout<<" Height : "<<x->height<<std::endl;
+  inorderDisplay(x->right);
+}
+
+template<class Type>
+void bst<Type>::preorderDisplay()
+{
+  preorderDisplay(root);
+}
+
+template<class Type>
+void bst<Type>::preorderDisplay(bstNode<Type>* x)
+{
+  if(x==NULL)
+    return ;
+  cout<<"Key : "<<x->data.getId();
+  std::cout<<" Height : "<<x->height<<std::endl;
+  preorderDisplay(x->left);
+  preorderDisplay(x->right);
+}
+
+template<class Type>
+void bst<Type>::levelorderDisplay()
+{
+  int i,j,level;
+  level=root->height;
+  for(i=0;i<=level;i++)
+  {
+    for(j=0;j<pow(2,(level-i));j++)
+     {
+       std::cout<<"       ";
+     }
+    levelorderDisplay(root,i,level-i);
+    std::cout<<endl;
+  }
+}
+
+template<class Type>
+void bst<Type>::levelorderDisplay(bstNode<Type>* x,int level,int z)
+{
+  if(x==NULL)
+  {
+    int y=pow(2,z+1),j;
+    for(j=0;j<y;j++)
+      cout<<"       ";
+    return ;
+  }
+  if(level==0)
+  {
+    std::cout<<x->data.getId();
+    int y=pow(2,z+1),j;
+    for(j=0;j<y-1;j++)
+      cout<<"       ";
+    return ;
+  }
+  levelorderDisplay(x->left,level-1,z);
+  //std::cout<<"       ";
+  levelorderDisplay(x->right,level-1,z);
+}
+
+template<class Type>
+void bst<Type>::PrintToFile(std::ofstream& outFile)
+{
+  PrintToFile(root,outFile);
+}
+
+template<class Type>
+void bst<Type>::PrintToFile(bstNode<Type>* x,std::ofstream& outFile)
+{
+  if(x==NULL)
+    return ;
+  x->data.storeFile(outFile);
+  PrintToFile(x->left,outFile);
+  PrintToFile(x->right,outFile);
+}
+
+#endif

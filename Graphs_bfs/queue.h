@@ -1,0 +1,48 @@
+#ifndef _QUEUE_INCLUDED_H
+#define _QUEUE_INCLUDED_H
+
+#include<iostream>
+#include"linked_lists.h"
+
+template<class Type>
+class queue{
+ private:
+  Chain<Type> q;
+ public:
+  bool isEmpty();
+  int length();
+  void enqueue(Type );
+  void dequeue(Type& );
+  void Display();
+};
+
+template <class Type>
+bool queue<Type>::isEmpty()
+{
+  return q.isEmpty();
+}
+
+template <class Type>
+int queue<Type>::length()
+{
+  return q.length();
+}
+
+template<class Type>
+void queue<Type>::enqueue(Type a)
+{
+  q.insert(a);
+}
+
+template<class Type>
+void queue<Type>::dequeue(Type& a)
+{
+  q.deleteElement(1,a);
+}
+
+template<class Type>
+void queue<Type>::Display()
+{
+  q.Display();
+}
+#endif

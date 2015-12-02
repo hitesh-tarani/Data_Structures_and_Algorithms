@@ -1,0 +1,234 @@
+#ifndef _LINKED_LISTS
+#define _LINKED_LISTS
+#include<iostream>
+#include<cstdlib>
+
+using namespace std;
+
+template <class Type> class Chain;
+template <class Type>
+class Node{
+friend class Chain<Type>;
+private:
+  Type data;
+  Node* next;
+};
+
+template <class Type>
+class Chain{
+private:
+  Node<Type> *first;
+  Node<Type> *last;
+  int len;
+public:
+  Chain();
+  //~Chain();
+  void insert(Type );
+  void insert(int , Type );
+  //void join(Chain& );
+  bool isEmpty();
+  int length();
+  bool find(int , Type& );
+  int search(Type& );
+  int search(Type ,bool (*function)(Type , Type ));
+  int search(char[] ,bool (*function)(Type , char[] ));
+  bool deleteElement(int , Type& );
+  Type getElement(int );
+  void Display();
+  bool traverse(Type& );
+  Node<Type>* iter;
+};
+
+template <class Type>
+Chain<Type>::Chain()
+{
+  first=last=NULL;
+  iter=first;
+  len=0;
+}
+
+template <class Type>
+void Chain<Type>::insert(Type value)
+{
+  Node<Type>* a=new Node<Type>;
+  if(first!=NULL)
+  {
+    last->next=a;
+  }
+  else
+  {
+    first=a;
+  }
+  a->data=value;
+  last=a;
+  a->next=NULL;
+  iter=first;
+  len++;
+}
+
+template <class Type>
+void Chain<Type>::insert(int pos,Type value)
+{
+  pos--;
+  Node<Type>* a=new Node<Type>;
+  if(pos==0)
+  {
+    a->next=first;
+    first=a;
+  }
+  else
+  {
+    Node<Type>* temp=first;
+    while(--pos)
+    {
+		temp=temp->next;
+    }
+    a->next=temp->next;
+    temp->next=a;
+  }
+  a->data=value;
+  iter=first;
+  len++;
+}
+
+template <class Type>
+bool Chain<Type>::isEmpty()
+{
+  return (first==NULL);
+}
+
+template <class Type>
+int Chain<Type>::length()
+{
+  return len;
+}
+
+template <class Type>
+Type Chain<Type>::getElement(int index)
+{
+  Node<Type>* temp=first;
+  while(--index)
+  {
+    temp=temp->next;
+  }
+  return temp->data;
+}
+
+template <class Type>
+bool Chain<Type>::find(int k, Type& x)
+{
+  if(k<1||k>len)
+    return false;
+  x=getElement(k);
+  return true;
+}
+
+template <class Type>
+int Chain<Type>::search(Type& x)
+{
+  int k=1;
+  Node<Type>* temp = first;
+  do{
+    if(temp->data==x)
+      return k;
+    k++;
+  }while(temp->next);
+  return 0;
+}
+
+template <class Type>
+int Chain<Type>::search(Type x, bool (*function)(Type a, Type b))
+{
+  int k=1;
+  Node<Type>* temp = first;
+  while(temp)
+  {
+    if(function(temp->data,x))
+    {
+      return k;
+    }
+    k++;
+    temp=temp->next;
+  }
+  return 0;
+}
+
+template <class Type>
+int Chain<Type>::search(char x[], bool (*function)(Type a, char b[]))
+{
+  int k=1;
+  Node<Type>* temp = first;
+  while(temp)
+  {
+    if(function(temp->data,x))
+    {
+      (temp->data).Display();
+      return k;
+    }
+    k++;
+    temp=temp->next;
+  }
+  return 0;
+}
+
+template <class Type>
+bool Chain<Type>::deleteElement(int pos, Type& x)
+{
+  if(pos<1||pos>len)
+    return false;
+  pos--;
+  if(pos==0)
+  {
+    x=first->data;
+    Node<Type>* temp1=first;
+    if(first!=last)
+    {
+      first=first->next;
+    }
+    else
+    {
+      first=last=NULL;
+    }
+    delete temp1;
+  }
+  else
+  {
+    Node<Type>* temp=first;
+    while(--pos)
+    {
+      temp=temp->next;
+    }
+    Node<Type>* temp1=temp->next;
+    temp->next=(temp->next)->next;
+    x=temp1->data;
+    delete temp1;
+  }
+  len--;
+  iter=first;
+  return true;
+}
+
+template <class Type>
+void Chain<Type>::Display()
+{
+  Node<Type>* a;
+  for(a=first;a!=NULL;a=a->next)
+    {
+      cout<<(a->data)->getPos()<<" ";
+    }
+  cout<<"\n";
+}
+
+template <class Type>
+bool Chain<Type>::traverse(Type& a)
+{
+  if(iter)
+  {
+   a=iter->data;
+   iter=iter->next;
+   return true;
+  }
+  iter=first;
+  return false;
+}
+#endif

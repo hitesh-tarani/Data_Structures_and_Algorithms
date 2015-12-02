@@ -1,0 +1,386 @@
+#ifndef _HASH_H
+#define _HASH_H
+
+#include<fstream>
+#include<iostream>
+#include"hospital-patient.h"
+#include"linked_lists.h"
+#include"Linear_lists.h"
+#include<cmath>
+#define A 0.618033989
+
+class openhash{
+private:
+  int length;
+  char collmethod;
+  int x;
+  int offset_len;
+  LinearList <record> hashtable;
+public:
+  openhash();
+  openhash(char ,int );
+  void allocate_size(char ,int );
+  void allocate_size(char ,int ,int );
+  int hash(char []);
+  bool storeElements(int );
+  void Display();
+  void PrintToFile();
+  bool search(char[] );
+  bool insert(record );
+  bool Delete(char[] );
+  int compress(int k);
+  int offset(int key);
+};
+
+class chain_hash{
+private:
+  int length;
+  int x;
+  LinearList< Chain<record> > hashtable;
+public:
+  chain_hash();
+  chain_hash(int );
+  void allocate_size(int );
+  int hash(char []);
+  bool storeElements(int );
+  bool insert(record );
+  void Display();
+  void PrintToFile();
+  bool search(char[] );
+  bool Delete(char[] );
+  int compress(int k);
+};
+
+openhash::openhash()
+{
+  x=4;
+}
+
+chain_hash::chain_hash()
+{
+  x=4;
+}
+
+chain_hash::chain_hash(int len)
+{
+  x=4;
+  hashtable.allocate_size(len);
+  length=len;
+}
+
+void chain_hash::allocate_size(int len)
+{
+  hashtable.allocate_size(len);
+  length=len;
+}
+
+bool chain_hash::storeElements(int len)
+{
+  char key[8];
+  ifstream File;
+  int temp;
+  File.open("input.txt");
+  record a;
+  while(len--)
+  {
+    a.storeRecord(File);
+    a.getId(key);
+    temp=compress(hash(key));
+    //cout<<key<<" "<<temp<<endl;
+    if((hashtable.returnListElement(temp+1)).length()>=(length/2))
+      return false;
+    (hashtable.returnListElement(temp+1)).insert(a);
+  }
+  return true;
+}
+
+bool chain_hash::insert(record a)
+{
+  int temp;
+  char key[8];
+  a.getId(key);
+  temp=compress(hash(key));
+  //cout<<key<<" "<<temp<<endl;
+  if((hashtable.returnListElement(temp+1)).length()>=(length/2))
+    return false;
+  (hashtable.returnListElement(temp+1)).insert(a);
+  return true;
+}
+
+openhash::openhash(char type,int len)
+{
+  offset_len=5;
+  if(type=='l')
+    collmethod='l';
+  else if(type=='d')
+    collmethod='d';
+  hashtable.allocate_size(len);
+  length=len;
+}
+
+void openhash::allocate_size(char type,int len)
+{
+  offset_len=5;
+  if(type=='l')
+    collmethod='l';
+  else if(type=='d')
+    collmethod='d';
+  hashtable.allocate_size(len);
+  length=len;
+}
+
+void openhash::allocate_size(char type,int len,int offlen)
+{
+  offset_len=offlen;
+  if(type=='l')
+    collmethod='l';
+  else if(type=='d')
+    collmethod='d';
+  hashtable.allocate_size(len);
+  length=len;
+}
+
+bool openhash::storeElements(int len)
+{
+  char key[8];
+  ifstream File;
+  int temp,k;
+  File.open("input.txt");
+  record a;
+  while(len--)
+  {
+    a.storeRecord(File);
+    a.getId(key);
+    k=hash(key);
+    temp=compress(k);
+    //cout<<key<<" "<<temp<<endl;
+    int i=0,j=temp;
+    if(collmethod=='l')
+    {
+      while((hashtable.returnListElement(j+1).flag==1)&&i<length)
+      {
+	j=(j+1)%length;
+	i=i+1;
+      }
+      if(i==length)
+      {
+	cout<<"rehash\n";
+	return false;
+      }
+      else
+	hashtable.insert(j+1,a);
+    }
+    else if(collmethod=='d')
+    {
+      while((hashtable.returnListElement(j+1).flag==1)&&i<length)
+      {
+	j=(j+offset(k))%length;
+	i=i+1;
+      }
+      if(i==length)
+      {
+	return false;
+      }
+      else
+	hashtable.insert(j+1,a);
+    }
+  }
+  return true;
+}
+
+bool openhash::insert(record a)
+{
+  char key[8];
+  a.getId(key);
+  int k=hash(key);
+  int temp=compress(k);
+  //cout<<key<<" "<<temp<<endl;
+  int i=0,j=temp;
+  if(collmethod=='l')
+  {
+    while((hashtable.returnListElement(j+1).flag==1)&&i<length)
+    {
+      j=(j+1)%length;
+      i=i+1;
+    }
+    if(i==length)
+    {
+      return false;
+    }
+    else
+    hashtable.insert(j+1,a);
+  }
+  else if(collmethod=='d')
+  {
+    while((hashtable.returnListElement(j+1).flag==1)&&i<length)
+    {
+      j=(j+offset(k))%length;
+      i=i+1;
+    }
+    if(i==length)
+    {
+      cout<<"rehash\n";
+      return false;
+    }
+    else
+      hashtable.insert(j+1,a);
+  }
+  return true;
+}
+
+bool openhash::search(char key[])
+{
+  int temp=compress(hash(key));
+  int len=0,shift;
+  if(collmethod=='l')
+    shift=1;
+  else
+    shift=offset(hash(key));
+  while(hashtable.returnListElement(temp+1).flag!=0 && len<length)
+  {
+    if(hashtable.returnListElement(temp+1).flag==1 && (hashtable.returnListElement(temp+1).keyComparator(key)))
+    {
+      (hashtable.returnListElement(temp+1)).Display();
+      return true;
+    }
+    len++;
+    temp=(temp+shift)%length;
+  }
+  return false;
+}
+
+bool openhash::Delete(char key[])
+{
+  int temp=compress(hash(key));
+  int len=0,shift;
+  if(collmethod=='l')
+    shift=1;
+  else
+    shift=offset(hash(key));
+  while(hashtable.returnListElement(temp+1).flag!=0 && len<length)
+  {
+    if(hashtable.returnListElement(temp+1).flag==1 && (hashtable.returnListElement(temp+1).keyComparator(key)))
+    {
+      (hashtable.returnListElement(temp+1)).Display();
+      record a;
+      a.flag=-1;
+      hashtable.returnListElement(temp+1)=a;
+      return true;
+    }
+    len++;
+    temp=(temp+shift)%length;
+  }
+  return false;
+}
+
+bool chain_hash::search(char key[])
+{
+  record a;
+  int temp=compress(hash(key));
+  return(hashtable.returnListElement(temp+1).search(key,recordComp)!=0);
+}
+
+bool chain_hash::Delete(char key[])
+{
+  record a;
+  int temp=compress(hash(key));
+  int pos=hashtable.returnListElement(temp+1).search(key,recordComp);
+  return(hashtable.returnListElement(temp+1).deleteElement(pos,a));
+}
+
+void openhash::Display()
+{
+  int len=length;
+  while(len--)
+  {
+    if(hashtable.returnListElement(length-len).flag==1)
+      cout<<"Key : "<<(hashtable.returnListElement(length-len)).getId()<<" Index : "<<length-len-1<<endl;
+  }
+}
+
+void openhash::PrintToFile()
+{
+  int len=length;
+  ofstream outfile;
+  outfile.open("input.txt",ofstream::out);
+  while(len--)
+  {
+    if(hashtable.returnListElement(length-len).flag==1)
+      (hashtable.returnListElement(length-len)).storeFile(outfile);
+  }
+}
+
+void chain_hash::Display()
+{
+  int len=length;
+  record a;
+  while(len--)
+  {
+    while((hashtable.returnListElement(length-len)).traverse(a))
+      cout<<a.getId()<<" ";
+    cout<<endl;
+  }
+}
+
+void chain_hash::PrintToFile()
+{
+  int len=length;
+  ofstream outfile;
+  outfile.open("input.txt",ofstream::out);
+  record a;
+  while(len--)
+  {
+    while((hashtable.returnListElement(length-len)).traverse(a))
+      a.storeFile(outfile);
+  }
+}
+
+int chain_hash::compress(int k)
+{
+  return floor(length*(fmod((k*A),1)));
+}
+
+int openhash::compress(int k)
+{
+  return floor(length*(fmod((k*A),1)));
+}
+
+int openhash::hash(char a[])
+{
+  int i,sum=0,key;
+  for(i=0;i<strlen(a);i++)	 
+  {
+    sum+=((int)a[i])*pow(x,i);
+  }
+  return sum;
+}
+
+int chain_hash::hash(char a[])
+{
+  int i,sum=0,key;
+  for(i=0;i<strlen(a);i++)	 
+  {
+    sum+=((int)a[i])*pow(x,i);
+  }
+  return sum;
+}
+
+int openhash::offset(int key)
+{
+  return (offset_len-key%offset_len);
+}
+
+#endif
+/*int main()
+{
+  openhash a;/*
+  a.storeElements(array_size);
+  a.search("B234");
+  chain_hash b;
+  b.storeElements(array_size);
+  b.search("B234");
+  //a.Display();
+  //b.Display();
+  return 0;
+}
+*/

@@ -1,0 +1,89 @@
+using namespace std;
+template <class T>
+
+class LinearList{
+private:
+  int MaxSize;
+  T *element;    // 1D dynamic array
+  int len;
+public:
+  LinearList(int  MaxSize);
+  LinearList(const LinearList& temp);
+  ~LinearList();
+  bool isEmpty();
+  int length();
+  int maxSize();
+  T returnListElement(int k);
+  bool find(int  k, T& x);
+  int search(T& x);
+  LinearList deleteElement(int  k, T& x);
+  LinearList insert(int  k, T& x);
+};
+
+LinearList<T>::LinearList(int MaxListSize)
+{ // Constructor for the sequential linear list
+  MaxSize = MaxListSize;
+  element = (T*)malloc(sizeof(MaxSize*T));
+  len = 0;
+}
+
+LinearList::LinearList(const LinearList& temp) 
+{ // Copy constructor
+  MaxSize=temp.MaxSize;
+  element = (T*)malloc(sizeof(MaxSize*T));
+  len=temp.len;
+  memcpy(element, temp.element, MaxSize); 
+}
+
+LinearList::~LinearList()
+{ // Distructor for the sequential linear list
+  delete [] element;
+}
+
+bool LinearList::isEmpty()
+{ // Function that checks whether the list is empty
+  return   len == 0;
+}
+
+int LinearList::length()
+{ // Function that returns the length of the list
+  return   len;
+}
+
+int LinearList::maxSize()
+{ // Function that returns the length of the list
+  return   MaxSize;
+}
+
+T LinearList<T>::returnListElement(int k)
+{ //Function that returns the k-th element of the list
+  return element[k];
+}
+
+bool LinearList<T>::find(int  k, T& x)
+{ // Set x to the kth element and return true if kth element is present otherwise return false. 
+  if (k < 1 || k > len)   return   false;
+  x = element[k-1];
+  return   true;
+}
+
+int LinearList<T>::search(T& x)
+{ // Search for x and return the position if found, else return 0.
+  for  (int  i=0; i < len;  i++)
+    if  (element[i] == x)    return   ++i;
+  return   0;
+}
+
+  len--;
+  return   *this;
+}
+
+LinearList LinearList<T>::insert(int  k, T& x)
+{ // Insert x after kth element. 
+  for  (int  i=len-1; i >= k;  i--){
+    element[i+1] = element[i];
+  }
+  element[k] = x;
+  len++; 
+  return   *this;
+}
